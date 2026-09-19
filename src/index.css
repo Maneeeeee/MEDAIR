@@ -1,0 +1,388 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   THEME TOKENS — every colour the UI uses is defined here.
+   Light (default) = warm humanist paper. Dark = restored cockpit
+   with innovative atmospheric + phosphor glow treatments layered on
+   top. Token swap is instant because every Tailwind colour resolves
+   to one of these variables via `rgb(var(--token) / <alpha-value>)`.
+   ============================================================ */
+
+:root {
+  /* Light — warm paper */
+  --bg:                252 250 246;  /* paper-50 */
+  --bg-raised:         244 241 234;  /* paper-100 */
+  --bg-hover:          235 230 220;  /* paper-150 */
+  --bg-panel:          251 250 246;  /* paper-50 surface */
+  --fg:                42  37  32;   /* ink-900 */
+  --fg-strong:         29  26  24;   /* ink-950 (added) */
+  --fg-secondary:      90  84  74;   /* ink-700 */
+  --fg-tertiary:       117 109 94;   /* ink-600 */
+  --fg-muted:          122 114 97;   /* paper-500 */
+  --border:            205 197 179;  /* paper-300 */
+  --border-strong:     168 159 138;  /* paper-400 */
+
+  --primary:           61  139 122;  /* primary-500 */
+  --primary-deep:      47  110 96;   /* primary-600 */
+  --primary-wash:      234 241 238;  /* primary-50 */
+
+  --warn:              196 133 36;   /* warn-500 */
+  --warn-wash:         247 238 220;  /* warn-50 */
+
+  --critical:          181 74  50;   /* critical-500 */
+  --critical-wash:     246 228 221;  /* critical-50 */
+
+  --ok:                90  150 112;  /* ok-500 */
+  --ok-wash:           236 243 237;  /* ok-50 */
+
+  /* Map / atmospheric */
+  --map-1:             244 241 234;
+  --map-2:             235 230 220;
+  --map-3:             220 213 199;
+
+  --country-fill:      235 230 220;  /* warm beige for neighbours */
+  --country-stroke:    168 159 138;
+  --armenia-fill:      61  139 122;
+  --armenia-stroke:    47  110 96;
+
+  /* Hydrology (Natural Earth CC0) — Lake Sevan + rivers */
+  --water-fill:        178 200 217;  /* light dusty blue */
+  --water-stroke:      132 162 184;
+
+  /* Innovation surfaces */
+  --glow-primary:      61 139 122;
+  --scanline:          0 0 0 / 0.04;
+  --backdrop:          42 37 32 / 0.40;
+
+  /* Shadows */
+  --shadow-color:      60 50 40 / 0.45;
+}
+
+[data-theme="dark"] {
+  /* Dark — restored cockpit, rebalanced. */
+  --bg:                7   11  20;   /* deep navy near-black */
+  --bg-raised:         13  18  30;   /* panel surface */
+  --bg-hover:          22  28  44;   /* hover */
+  --bg-panel:          13  18  30;
+  --fg:                226 232 240;  /* slate-200 */
+  --fg-strong:         248 250 252;
+  --fg-secondary:      148 163 184;  /* slate-400 */
+  --fg-tertiary:       100 116 139;  /* slate-500 */
+  --fg-muted:          71  85  105;  /* slate-600 */
+  --border:            30  41  59;   /* slate-800 */
+  --border-strong:     51  65  85;   /* slate-700 */
+
+  --primary:           34  211 238;  /* medical cyan */
+  --primary-deep:      103 232 249;
+  --primary-wash:      13  148 136 / 0.15;
+
+  --warn:              245 158 11;   /* amber */
+  --warn-wash:         245 158 11 / 0.15;
+
+  --critical:          239 68  68;   /* red */
+  --critical-wash:     239 68  68 / 0.15;
+
+  --ok:                16  185 129;  /* emerald */
+  --ok-wash:           16  185 129 / 0.15;
+
+  /* Map / atmospheric — aurora gradient for cockpit depth */
+  --map-1:             8   14  28;
+  --map-2:             7   9   20;
+  --map-3:             5   7   16;
+
+  --country-fill:      15  23  42;   /* deep panel */
+  --country-stroke:    71  85  105;  /* slate-600 */
+  --armenia-fill:      34  211 238;
+  --armenia-stroke:    103 232 249;
+
+  /* Hydrology (Natural Earth CC0) — luminous steel-teal in cockpit mode */
+  --water-fill:        30  78  120;  /* deep teal-blue */
+  --water-stroke:      64 158 199;  /* brighter river line */
+
+  /* Innovation surfaces */
+  --glow-primary:      34  211 238;
+  --scanline:          255 255 255 / 0.025;
+  --backdrop:          0  0  0  / 0.70;
+
+  /* Shadows — tinted cyan-black for dark glow */
+  --shadow-color:      0   0  0 / 0.75;
+}
+
+/* ---------- Base typography + body ---------- */
+@layer base {
+  html,
+  body {
+    @apply bg-paper-50 text-ink-800 antialiased;
+    font-feature-settings: "ss01" on, "cv02" on;
+    transition: background-color 240ms ease, color 240ms ease;
+  }
+  body {
+    font-variant-numeric: tabular-nums;
+  }
+  h1, h2, h3, h4 {
+    @apply text-ink-900;
+  }
+  /* Global transition on colour changes — only for background-color and
+     color, so we don't get jank during interactions. */
+  *,
+  *::before,
+  *::after {
+    border-color: rgb(var(--border) / 1);
+  }
+}
+
+/* ---------- Leaflet: warm-paper map (light) / aurora cockpit (dark) ----------
+   The map backdrop uses a 3-stop radial gradient from the CSS tokens.
+   Dark mode adds a CRT scanline overlay via ::before so the empty
+   geography reads as "monitor" rather than "void". */
+.leaflet-container {
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      rgb(var(--map-1) / 1) 0%,
+      rgb(var(--map-2) / 1) 65%,
+      rgb(var(--map-3) / 1) 100%
+    );
+  font-family: inherit;
+  outline: none;
+  transition: background 240ms ease;
+}
+
+/* Light mode: subtle coordinate grid in soft primary tint
+   Dark mode: barely-there scanline + faint grid for CRT feel */
+.leaflet-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgb(var(--primary) / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--primary) / 0.04) 1px, transparent 1px);
+  background-size: 72px 72px;
+  transition: background-image 240ms ease;
+}
+
+[data-theme="dark"] .leaflet-container::before {
+  background-image:
+    /* Faint coordinate grid */
+    linear-gradient(to right, rgb(var(--primary) / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--primary) / 0.05) 1px, transparent 1px),
+    /* CRT scanlines — barely visible */
+    repeating-linear-gradient(
+      to bottom,
+      rgb(var(--scanline)) 0px,
+      rgb(var(--scanline)) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  background-size: 72px 72px, 72px 72px, 100% 3px;
+}
+
+/* ---------- Map labels (none currently used — kept minimal) ---------- */
+
+/* ---------- Innovation: phosphor glow utilities (dark mode) ----------
+   Dark mode only. Subtle cyan/amber glow effects on key UI
+   elements so the cockpit feels alive without going cyberpunk. */
+[data-theme="dark"] .glow-primary {
+  box-shadow:
+    0 0 0 1px rgb(var(--primary) / 0.30) inset,
+    0 0 24px -4px rgb(var(--primary) / 0.45);
+}
+[data-theme="dark"] .glow-warn {
+  box-shadow:
+    0 0 0 1px rgb(var(--warn) / 0.30) inset,
+    0 0 24px -4px rgb(var(--warn) / 0.40);
+}
+[data-theme="dark"] .glow-critical {
+  box-shadow:
+    0 0 0 1px rgb(var(--critical) / 0.30) inset,
+    0 0 24px -4px rgb(var(--critical) / 0.50);
+}
+[data-theme="dark"] .glow-ok {
+  box-shadow:
+    0 0 0 1px rgb(var(--ok) / 0.30) inset,
+    0 0 24px -4px rgb(var(--ok) / 0.40);
+}
+[data-theme="dark"] .glow-text-primary {
+  text-shadow: 0 0 12px rgb(var(--primary) / 0.55);
+}
+[data-theme="dark"] .glow-text-warn {
+  text-shadow: 0 0 12px rgb(var(--warn) / 0.55);
+}
+
+/* Subtle keyframe for cockpit "scan" sweep on the map area */
+@keyframes scan-sweep {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+[data-theme="dark"] .leaflet-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(var(--primary) / 0.06) 48%,
+    rgb(var(--primary) / 0.10) 50%,
+    rgb(var(--primary) / 0.06) 52%,
+    transparent 100%
+  );
+  height: 90px;
+  animation: scan-sweep 7s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.leaflet-control-attribution {
+  background: rgb(var(--bg-panel) / 0.85) !important;
+  color: rgb(var(--fg-muted) / 1) !important;
+  font-size: 10px !important;
+  backdrop-filter: blur(8px);
+  border-radius: 6px !important;
+  border: 1px solid rgb(var(--border) / 1) !important;
+}
+.leaflet-control-attribution a {
+  color: rgb(var(--primary) / 1) !important;
+}
+.leaflet-control-zoom {
+  border: 1px solid rgb(var(--border) / 1) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgb(var(--shadow-color)) !important;
+}
+.leaflet-control-zoom a {
+  background: rgb(var(--bg-panel) / 1) !important;
+  color: rgb(var(--fg-secondary) / 1) !important;
+  border: none !important;
+  border-bottom: 1px solid rgb(var(--border) / 1) !important;
+  font-family: "JetBrains Mono", monospace !important;
+  font-weight: 500 !important;
+  transition: background 140ms ease;
+}
+.leaflet-control-zoom a:last-child {
+  border-bottom: none !important;
+}
+.leaflet-control-zoom a:hover {
+  background: rgb(var(--bg-hover) / 1) !important;
+  color: rgb(var(--primary) / 1) !important;
+}
+
+/* Custom marker styles */
+.medical-marker,
+.drone-station-marker,
+.drone-marker,
+.city-marker,
+.emergency-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-tooltip,
+.leaflet-popup-content-wrapper {
+  background: rgb(var(--bg-panel) / 0.97) !important;
+  color: rgb(var(--fg) / 1) !important;
+  border: 1px solid rgb(var(--border) / 1) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 12px rgb(var(--shadow-color)),
+    0 12px 32px rgb(var(--shadow-color)) !important;
+  font-family: inherit !important;
+}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  border-top-color: rgb(var(--border) / 1) !important;
+}
+.leaflet-popup-tip {
+  background: rgb(var(--bg-panel) / 0.97) !important;
+  border: 1px solid rgb(var(--border) / 1) !important;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgb(var(--bg) / 1);
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-strong) / 1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--fg-muted) / 1);
+}
+
+/* ---------- Component primitives ---------- */
+@layer components {
+  .panel {
+    @apply rounded-xl border bg-paper-100 shadow-panel;
+    background: rgb(var(--bg-raised) / 0.85);
+    border-color: rgb(var(--border) / 1);
+    backdrop-filter: blur(12px);
+  }
+  .panel-strong {
+    @apply rounded-xl border shadow-panel;
+    background: rgb(var(--bg-panel) / 1);
+    border-color: rgb(var(--border-strong) / 1);
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em];
+  }
+  .stat-num {
+    @apply font-mono text-3xl font-semibold leading-none tracking-tight tabular-nums;
+  }
+  .mono {
+    @apply font-mono tabular-nums;
+  }
+  .label-eyebrow {
+    @apply text-[10px] font-medium uppercase tracking-[0.1em];
+    color: rgb(var(--fg-tertiary) / 1);
+  }
+  /* Innovation: single bracket motif on active panel headers (dark only) */
+  [data-theme="dark"] .brackets-cockpit {
+    position: relative;
+  }
+  [data-theme="dark"] .brackets-cockpit::before,
+  [data-theme="dark"] .brackets-cockpit::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-color: rgb(var(--primary) / 0.5);
+    border-style: solid;
+    pointer-events: none;
+  }
+  [data-theme="dark"] .brackets-cockpit::before {
+    top: 8px;
+    right: 8px;
+    border-width: 1px 1px 0 0;
+  }
+  [data-theme="dark"] .brackets-cockpit::after {
+    bottom: 8px;
+    left: 8px;
+    border-width: 0 0 1px 1px;
+  }
+}
+
+/* ---------- Map markers ---------- */
+.leaflet-marker-icon {
+  transition: filter 200ms ease-out, transform 200ms ease-out;
+}
+.leaflet-marker-icon:hover {
+  filter: brightness(1.18) drop-shadow(0 2px 4px rgb(var(--shadow-color)));
+  z-index: 999 !important;
+}
+
+::selection {
+  background: rgb(var(--primary) / 0.32);
+  color: rgb(var(--fg-strong) / 1);
+}
