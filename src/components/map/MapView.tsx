@@ -54,6 +54,81 @@ interface MapViewProps {
 
 const ARMENIA_CENTER: [number, number] = [40.05, 44.95];
 
+/* =============================================================
+ * GlowingArmeniaBorder
+ *
+ * Renders the Armenia polygon as three stacked SVG paths so the
+ * combined effect reads as a luminous neon outline with a soft
+ * pulsing aura:
+ *
+ *   1. Halo    — wide, very low opacity, breathing animation
+ *   2. Mid     — medium width + opacity, fixed glow
+ *   3. Core    — thin crisp line + cyan fill
+ *
+ * react-leaflet's <GeoJSON> doesn't expose `className`, so we
+ * attach CSS classes to the underlying SVG <path> elements via a
+ * ref + a small `onEachFeature` no-op.
+ * ============================================================= */
+function GlowingArmeniaBorder() {
+  return (
+    <>
+      <GeoJSON
+        key="armenia-halo"
+        data={armeniaGeoJSON as any}
+        style={{
+          color: "rgb(var(--armenia-glow) / 0.55)",
+          weight: 18,
+          opacity: 0.4,
+          fillColor: "transparent",
+          fillOpacity: 0,
+          lineCap: "round",
+          lineJoin: "round",
+          interactive: false,
+        }}
+        onEachFeature={(_, layer) => {
+          const el = (layer as L.Path & { _path?: SVGPathElement })._path;
+          if (el) el.classList.add("fr-armenia-halo");
+        }}
+      />
+      <GeoJSON
+        key="armenia-mid"
+        data={armeniaGeoJSON as any}
+        style={{
+          color: "rgb(var(--armenia-glow) / 0.9)",
+          weight: 8,
+          opacity: 0.75,
+          fillColor: "transparent",
+          fillOpacity: 0,
+          lineCap: "round",
+          lineJoin: "round",
+          interactive: false,
+        }}
+        onEachFeature={(_, layer) => {
+          const el = (layer as L.Path & { _path?: SVGPathElement })._path;
+          if (el) el.classList.add("fr-armenia-mid");
+        }}
+      />
+      <GeoJSON
+        key="armenia-core"
+        data={armeniaGeoJSON as any}
+        style={{
+          color: "rgb(var(--armenia-stroke) / 1)",
+          weight: 2.5,
+          opacity: 1,
+          fillColor: "rgb(var(--armenia-fill) / 1)",
+          fillOpacity: 0.18,
+          lineCap: "round",
+          lineJoin: "round",
+        }}
+        onEachFeature={(_, layer) => {
+          const el = (layer as L.Path & { _path?: SVGPathElement })._path;
+          if (el) el.classList.add("fr-armenia-core");
+        }}
+      />
+    </>
+  );
+}
+
 function FitBoundsOnFirstLoad({ cities }: { cities: City[] }) {
   const map = useMap();
   const done = useRef(false);
@@ -89,13 +164,7 @@ function FlyToSelected({
   cityById: (id: string) => City;
 }) {
   const map = useMap();
-  // Track the last selection signature so the fly-to only fires when the
-  // selection itself changes — not on every simulation tick (which would
-  // otherwise yank the map back to the selected item every frame and
-  // prevent the user from panning/zooming freely).
   const prevSignature = useRef("");
-  // Keep refs to the latest data so the effect can read fresh values without
-  // depending on them and re-running on every tick.
   const dronesRef = useRef(drones);
   const hospitalsRef = useRef(hospitals);
   const cityByIdRef = useRef(cityById);
@@ -166,7 +235,7 @@ export function MapView(props: MapViewProps) {
     onPickEmergency,
   } = props;
 
-  // Build polylines for active routes (dashed amber for in-flight).
+  // Build polylines for active routes. Tail = travelled, head = remaining.
   const activeRouteSegments = useMemo(() => {
     return drones
       .filter((d) => d.status === "in-flight" || d.status === "returning")
@@ -180,6 +249,7 @@ export function MapView(props: MapViewProps) {
         );
         return {
           id: d.id,
+          status: d.status,
           tail: d.status === "in-flight" ? [cur, { lat: t.lat, lng: t.lng }] : [{ lat: o.lat, lng: o.lng }, cur],
           head: d.status === "in-flight" ? [{ lat: o.lat, lng: o.lng }, cur] : [cur, { lat: t.lat, lng: t.lng }],
         };
@@ -196,34 +266,23 @@ export function MapView(props: MapViewProps) {
       attributionControl
       className="h-full w-full"
     >
-      {/* Self-contained country basemap — embedded GeoJSON, no external
-          tile server required. Rendered in the warm paper palette: countries
-          use warm grey fills + warm dark borders, Armenia gets a primary-teal
-          wash so it sits on the page like a highlighted region on a printed
-          atlas. */}
-      {/* GeoJSON country + Armenia polygons. Fills and strokes are passed as
-          CSS-variable strings (e.g. `rgb(var(--country-fill) / 1)`) so modern
-          browsers resolve them against the active [data-theme] and re-paint
-          when the theme swaps. The leaflet-container's gradient backdrop
-          shows through transparent neighbours and around the borders. */}
+      {/* Country basemap — embedded GeoJSON, no tile server required.
+          Drawn as a flat deep slate fill so the Flightradar aesthetic
+          reads instantly: dark background, neon country borders,
+          illuminated Armenia. */}
       <GeoJSON
         key="region"
         data={regionGeoJSON as any}
         style={{
           color: "rgb(var(--country-stroke) / 1)",
-          weight: 0.6,
-          opacity: 0.85,
+          weight: 1,
+          opacity: 0.75,
           fillColor: "rgb(var(--country-fill) / 1)",
-          fillOpacity: 0.85,
-          dashArray: "2 3",
+          fillOpacity: 1,
         }}
       />
 
-      {/* Real hydrology — Natural Earth CC0 data. Lake Sevan + Araxes /
-          Kura / Murat / Talkeh rivers clipped to Armenia's region. The
-          GeoJSON `kind` discriminator branches the styling: lakes get a
-          filled polygon, rivers get a thin line. CSS-variable strings mean
-          the colours re-paint under [data-theme="dark"]. */}
+      {/* Real hydrology — Natural Earth CC0 data. */}
       {layers.hydrology && (
         <>
           <GeoJSON
@@ -231,10 +290,10 @@ export function MapView(props: MapViewProps) {
             data={lakesGeoJSON as any}
             style={{
               color: "rgb(var(--water-stroke) / 1)",
-              weight: 1,
-              opacity: 0.85,
+              weight: 1.2,
+              opacity: 0.95,
               fillColor: "rgb(var(--water-fill) / 1)",
-              fillOpacity: 0.85,
+              fillOpacity: 0.95,
             }}
           />
           <GeoJSON
@@ -242,8 +301,8 @@ export function MapView(props: MapViewProps) {
             data={riversGeoJSON as any}
             style={{
               color: "rgb(var(--water-stroke) / 1)",
-              weight: 1.1,
-              opacity: 0.78,
+              weight: 1.4,
+              opacity: 0.85,
               fillColor: "transparent",
               fillOpacity: 0,
             }}
@@ -251,17 +310,19 @@ export function MapView(props: MapViewProps) {
         </>
       )}
 
-      <GeoJSON
-        key="armenia"
-        data={armeniaGeoJSON as any}
-        style={{
-          color: "rgb(var(--armenia-stroke) / 1)",
-          weight: 1.75,
-          opacity: 0.95,
-          fillColor: "rgb(var(--armenia-fill) / 1)",
-          fillOpacity: 0.16,
-        }}
-      />
+      {/* =============================================================
+         Armenia border — Flightradar-style glowing outline.
+         Three stacked GeoJSON layers, each pointing at the same polygon:
+            1. .fr-armenia-halo  — wide, very soft, breathes
+            2. .fr-armenia-mid   — medium, brighter
+            3. .fr-armenia-core  — thin crisp line
+         The CSS rules in index.css apply progressive drop-shadow filters
+         to each layer so the combined effect is a luminous neon outline
+         with a soft pulsing aura. We disable the polygon fill on the
+         outer two layers and only use it on the core so the cyan wash
+         stays contained.
+         ============================================================= */}
+      <GlowingArmeniaBorder />
 
       <ZoomControl position="bottomright" />
       <FitBoundsOnFirstLoad cities={cities} />
@@ -299,7 +360,9 @@ export function MapView(props: MapViewProps) {
           </Circle>
         ))}
 
-      {/* Static route overlay (very subtle) */}
+      {/* Static route overlay — Flightradar style: solid neon,
+          tight opacity, no dashes. The line is a visible "corridor"
+          that reads as infrastructure on the map. */}
       {layers.routes &&
         routes.map((r, i) => {
           const a = cityById(r.fromCityId);
@@ -313,26 +376,38 @@ export function MapView(props: MapViewProps) {
               ]}
               pathOptions={{
                 color: "rgb(var(--primary) / 1)",
-                weight: 1,
-                opacity: 0.18,
-                dashArray: "2 6",
+                weight: 1.5,
+                opacity: 0.32,
               }}
             />
           );
         })}
 
-      {/* Active route segments (warm amber, dashed, animated) */}
+      {/* Active route segments.
+            tail  = portion already flown (solid amber, dim) — the "history"
+            head  = portion still to fly   (solid amber, bright) — the future
+          The split lets the eye follow the drone's progress at a glance. */}
       {layers.routes &&
         activeRouteSegments.map((seg) => (
           <Polyline
-            key={`active-${seg.id}`}
+            key={`active-tail-${seg.id}`}
             positions={seg.tail}
             pathOptions={{
               color: "rgb(var(--warn) / 1)",
-              weight: 2,
-              opacity: 0.5,
-              dashArray: "6 6",
-              className: "animate-dashFlow",
+              weight: 2.2,
+              opacity: 0.45,
+            }}
+          />
+        ))}
+      {layers.routes &&
+        activeRouteSegments.map((seg) => (
+          <Polyline
+            key={`active-head-${seg.id}`}
+            positions={seg.head}
+            pathOptions={{
+              color: "rgb(var(--warn) / 1)",
+              weight: 3,
+              opacity: 0.95,
             }}
           />
         ))}
@@ -343,7 +418,7 @@ export function MapView(props: MapViewProps) {
           <Marker
             key={c.id}
             position={[c.lat, c.lng]}
-            icon={cityIcon(c.name)}
+            icon={cityIcon(c.name, c.population)}
             eventHandlers={{ click: () => onPickCity(c.id) }}
             zIndexOffset={-100}
           />
@@ -439,6 +514,7 @@ export function MapView(props: MapViewProps) {
                 heading: Math.round(heading),
                 status: d.status,
                 battery: d.battery,
+                id: d.id,
               })}
               eventHandlers={{ click: () => onPickDrone(d.id) }}
               zIndexOffset={d.status === "in-flight" ? 500 : 100}

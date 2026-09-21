@@ -46,6 +46,7 @@
   --country-stroke:    168 159 138;
   --armenia-fill:      61  139 122;
   --armenia-stroke:    47  110 96;
+  --armenia-glow:      61  139 122;
 
   /* Hydrology (Natural Earth CC0) — Lake Sevan + rivers */
   --water-fill:        178 200 217;  /* light dusty blue */
@@ -87,19 +88,22 @@
   --ok:                16  185 129;  /* emerald */
   --ok-wash:           16  185 129 / 0.15;
 
-  /* Map / atmospheric — aurora gradient for cockpit depth */
-  --map-1:             8   14  28;
-  --map-2:             7   9   20;
-  --map-3:             5   7   16;
+  /* Map / atmospheric — Flightradar-style flat dark with a soft
+     radial vignette to lift the centre. The numbers below define
+     the radial gradient stops, NOT a single colour. */
+  --map-1:             12  22  40;   /* centre — slightly lifted */
+  --map-2:             7   13  26;
+  --map-3:             4   8   18;   /* edges — deepest */
 
-  --country-fill:      15  23  42;   /* deep panel */
-  --country-stroke:    71  85  105;  /* slate-600 */
-  --armenia-fill:      34  211 238;
-  --armenia-stroke:    103 232 249;
+  --country-fill:      17  27  48;   /* deep panel — neighbours */
+  --country-stroke:    94  120  150; /* slate-400 — visible at the edges */
+  --armenia-fill:      34  211 238;  /* medical cyan — highlighted country */
+  --armenia-stroke:    103 232 249;  /* brighter cyan core */
+  --armenia-glow:      34  211 238;  /* glow colour for the drop-shadow */
 
   /* Hydrology (Natural Earth CC0) — luminous steel-teal in cockpit mode */
-  --water-fill:        30  78  120;  /* deep teal-blue */
-  --water-stroke:      64 158 199;  /* brighter river line */
+  --water-fill:        24  66  110;  /* deep teal-blue */
+  --water-stroke:      72  168 209; /* brighter river line */
 
   /* Innovation surfaces */
   --glow-primary:      34  211 238;
@@ -133,16 +137,15 @@
   }
 }
 
-/* ---------- Leaflet: warm-paper map (light) / aurora cockpit (dark) ----------
-   The map backdrop uses a 3-stop radial gradient from the CSS tokens.
-   Dark mode adds a CRT scanline overlay via ::before so the empty
-   geography reads as "monitor" rather than "void". */
+/* ---------- Leaflet: warm-paper map (light) / Flightradar cockpit (dark) ----------
+   Dark mode uses a tighter radial vignette and a more visible coordinate
+   grid so the basemap reads as a "screen" rather than empty void. */
 .leaflet-container {
   background:
     radial-gradient(
-      ellipse at 50% 35%,
+      ellipse at 50% 50%,
       rgb(var(--map-1) / 1) 0%,
-      rgb(var(--map-2) / 1) 65%,
+      rgb(var(--map-2) / 1) 55%,
       rgb(var(--map-3) / 1) 100%
     );
   font-family: inherit;
@@ -150,8 +153,9 @@
   transition: background 240ms ease;
 }
 
-/* Light mode: subtle coordinate grid in soft primary tint
-   Dark mode: barely-there scanline + faint grid for CRT feel */
+/* Coordinate grid — every leaf in the basemap. Subtle in light mode,
+   sharper + slightly cyan-tinted in dark mode so it reads like an
+   aviation radar display. */
 .leaflet-container::before {
   content: "";
   position: absolute;
@@ -159,18 +163,21 @@
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(to right, rgb(var(--primary) / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(var(--primary) / 0.04) 1px, transparent 1px);
-  background-size: 72px 72px;
+    linear-gradient(to right, rgb(var(--primary) / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--primary) / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
   transition: background-image 240ms ease;
 }
 
 [data-theme="dark"] .leaflet-container::before {
   background-image:
-    /* Faint coordinate grid */
-    linear-gradient(to right, rgb(var(--primary) / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(var(--primary) / 0.05) 1px, transparent 1px),
-    /* CRT scanlines — barely visible */
+    /* Coordinate grid — 64px primary, 256px major */
+    linear-gradient(to right, rgb(var(--primary) / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--primary) / 0.07) 1px, transparent 1px),
+    /* Major grid every 256px (4x) */
+    linear-gradient(to right, rgb(var(--primary) / 0.13) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--primary) / 0.13) 1px, transparent 1px),
+    /* Faint scanline */
     repeating-linear-gradient(
       to bottom,
       rgb(var(--scanline)) 0px,
@@ -236,6 +243,52 @@
   );
   height: 90px;
   animation: scan-sweep 7s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ---------- Flightradar-style Armenia border glow ----------
+   The Armenia polygon is rendered as three stacked GeoJSON layers
+   (outer halo / mid glow / crisp core). The CSS classes below apply
+   progressive drop-shadow filters to each layer so the combined effect
+   reads as a luminous neon border with a soft, breathing aura around
+   the country.
+*/
+.fr-armenia-halo {
+  /* SVG drop-shadow — wide + soft. The single shadow at high blur does
+     the bulk of the glow; the second smaller one tightens the edge. */
+  filter:
+    drop-shadow(0 0 14px rgb(var(--armenia-glow) / 0.55))
+    drop-shadow(0 0 28px rgb(var(--armenia-glow) / 0.35));
+  animation: fr-armenia-breathe 4.6s ease-in-out infinite;
+}
+.fr-armenia-mid {
+  filter:
+    drop-shadow(0 0 6px rgb(var(--armenia-glow) / 0.85))
+    drop-shadow(0 0 14px rgb(var(--armenia-glow) / 0.45));
+}
+.fr-armenia-core {
+  filter:
+    drop-shadow(0 0 2px rgb(var(--armenia-glow) / 1))
+    drop-shadow(0 0 6px rgb(var(--armenia-glow) / 0.7));
+}
+
+@keyframes fr-armenia-breathe {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 14px rgb(var(--armenia-glow) / 0.55))
+      drop-shadow(0 0 28px rgb(var(--armenia-glow) / 0.35));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 22px rgb(var(--armenia-glow) / 0.85))
+      drop-shadow(0 0 42px rgb(var(--armenia-glow) / 0.55));
+  }
+}
+
+/* Country borders (neighbours) — a touch brighter so they read
+   clearly against the dark background, but quiet enough not to compete
+   with the Armenia glow. */
+[data-theme="dark"] .leaflet-pane svg path[stroke^="rgb"] {
+  shape-rendering: geometricPrecision;
 }
 
 .leaflet-control-attribution {
