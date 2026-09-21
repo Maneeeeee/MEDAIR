@@ -1,6 +1,6 @@
 import { LogoMark } from "../ui/Icons";
 import { NetworkStats } from "./NetworkStats";
-import { AlertTriangle, Phone, Menu } from "lucide-react";
+import { AlertTriangle, Phone, Menu, Presentation } from "lucide-react";
 import { Button } from "../ui/Button";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import type { LiveKpis } from "../../hooks/useDroneSimulation";
@@ -11,6 +11,7 @@ export function Header({
   onOpenContact,
   onOpenDispatch,
   onToggleFilters,
+  onOpenPresentation,
   theme,
   onToggleTheme,
 }: {
@@ -18,6 +19,7 @@ export function Header({
   onOpenContact: () => void;
   onOpenDispatch: () => void;
   onToggleFilters: () => void;
+  onOpenPresentation: () => void;
   theme: Theme;
   onToggleTheme: () => void;
 }) {
@@ -70,6 +72,11 @@ export function Header({
         >
           <AlertTriangle size={14} />
           <span className="hidden sm:inline">Dispatch</span>
+        </Button>
+
+        <Button variant="secondary" onClick={onOpenPresentation} className="shrink-0" aria-label="Open presentation workspace">
+          <Presentation size={14} />
+          <span className="hidden lg:inline">Present</span>
         </Button>
 
         <Button variant="secondary" onClick={onToggleFilters} className="shrink-0 md:hidden">

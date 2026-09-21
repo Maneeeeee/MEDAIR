@@ -6,6 +6,7 @@ import { DronePanel } from "./components/panels/DronePanel";
 import { EmergencyPanel } from "./components/panels/EmergencyPanel";
 import { ContactModal } from "./components/modals/ContactModal";
 import { DispatchWizard } from "./components/modals/DispatchWizard";
+import { PresentationModal } from "./components/modals/PresentationModal";
 import { MapView } from "./components/map/MapView";
 import { MapPresetSwitcher } from "./components/map/MapPresetSwitcher";
 import { useTheme } from "./hooks/useTheme";
@@ -148,6 +149,7 @@ export default function App() {
   const [selectedEmergencyId, setSelectedEmergencyId] = useState<string | null>(null);
   const [contactOpen, setContactOpen] = useState(false);
   const [dispatchOpen, setDispatchOpen] = useState(false);
+  const [presentationOpen, setPresentationOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([
@@ -371,6 +373,7 @@ export default function App() {
         onToggleTheme={toggleTheme}
         onOpenContact={() => setContactOpen(true)}
         onOpenDispatch={() => setDispatchOpen(true)}
+        onOpenPresentation={() => setPresentationOpen(true)}
         onToggleFilters={() => setFiltersOpen((v) => !v)}
       />
 
@@ -621,6 +624,7 @@ export default function App() {
       </div>
 
       {contactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
+      {presentationOpen && <PresentationModal onClose={() => setPresentationOpen(false)} />}
       {dispatchOpen && (
         <DispatchWizard
           stations={droneStations}
