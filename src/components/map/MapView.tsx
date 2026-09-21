@@ -267,22 +267,29 @@ export function MapView(props: MapViewProps) {
       className="h-full w-full"
     >
       {/* Country basemap — embedded GeoJSON, no tile server required.
-          Drawn as a flat deep slate fill so the Flightradar aesthetic
-          reads instantly: dark background, neon country borders,
-          illuminated Armenia. */}
+          Drawn as a flat deep-slate fill so the Flightradar aesthetic
+          reads instantly: dark background, ghost-thin country borders,
+          illuminated Armenia.
+
+          FR24 pattern: the entire canvas is the deepest colour (ocean),
+          and countries are a SUBTLY-lighter land mass on top. Borders
+          are near-invisible so the data layer dominates. */}
       <GeoJSON
         key="region"
         data={regionGeoJSON as any}
         style={{
           color: "rgb(var(--country-stroke) / 1)",
-          weight: 1,
-          opacity: 0.75,
+          weight: 0.8,
+          opacity: 0.55,
           fillColor: "rgb(var(--country-fill) / 1)",
           fillOpacity: 1,
         }}
       />
 
-      {/* Real hydrology — Natural Earth CC0 data. */}
+      {/* Real hydrology — Natural Earth CC0 data.
+          FR24 uses a near-invisible water layer — lakes and rivers are
+          barely darker than land, so geography is implied without any
+          teal tint competing with the data. */}
       {layers.hydrology && (
         <>
           <GeoJSON
@@ -290,10 +297,10 @@ export function MapView(props: MapViewProps) {
             data={lakesGeoJSON as any}
             style={{
               color: "rgb(var(--water-stroke) / 1)",
-              weight: 1.2,
-              opacity: 0.95,
+              weight: 0.6,
+              opacity: 0.45,
               fillColor: "rgb(var(--water-fill) / 1)",
-              fillOpacity: 0.95,
+              fillOpacity: 1,
             }}
           />
           <GeoJSON
@@ -301,8 +308,8 @@ export function MapView(props: MapViewProps) {
             data={riversGeoJSON as any}
             style={{
               color: "rgb(var(--water-stroke) / 1)",
-              weight: 1.4,
-              opacity: 0.85,
+              weight: 0.8,
+              opacity: 0.35,
               fillColor: "transparent",
               fillOpacity: 0,
             }}

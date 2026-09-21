@@ -37,10 +37,12 @@
   --ok:                90  150 112;  /* ok-500 */
   --ok-wash:           236 243 237;  /* ok-50 */
 
-  /* Map / atmospheric */
-  --map-1:             244 241 234;
-  --map-2:             235 230 220;
-  --map-3:             220 213 199;
+  /* Map / atmospheric — light mode is flat paper with the lightest stop
+     at the edges of the radial gradient (the "ocean" for warm paper). */
+  --map-ocean:         244 241 234;
+  --map-1:             252 250 246;
+  --map-2:             246 243 236;
+  --map-3:             238 234 224;
 
   --country-fill:      235 230 220;  /* warm beige for neighbours */
   --country-stroke:    168 159 138;
@@ -88,22 +90,25 @@
   --ok:                16  185 129;  /* emerald */
   --ok-wash:           16  185 129 / 0.15;
 
-  /* Map / atmospheric — Flightradar-style flat dark with a soft
-     radial vignette to lift the centre. The numbers below define
-     the radial gradient stops, NOT a single colour. */
-  --map-1:             12  22  40;   /* centre — slightly lifted */
-  --map-2:             7   13  26;
-  --map-3:             4   8   18;   /* edges — deepest */
+  /* Map / atmospheric — Flightradar-style basemap.
+     The map is read as OCEAN + LAND: the deepest colour is the ocean
+     (sits under everything, also the Leaflet container background);
+     land masses are ~5–10% lighter; country borders are ghost-thin. */
+  --map-ocean:         10  14  20;   /* deepest — "ocean" base */
+  --map-1:             14  19  28;   /* centre — subtle lift */
+  --map-2:             12  17  24;
+  --map-3:             10  14  20;   /* edges — back to ocean */
 
-  --country-fill:      17  27  48;   /* deep panel — neighbours */
-  --country-stroke:    94  120  150; /* slate-400 — visible at the edges */
+  --country-fill:      18  24  34;   /* land — just barely lighter than ocean */
+  --country-stroke:    38  48  64;   /* ghostly slate — visible only on hover */
   --armenia-fill:      34  211 238;  /* medical cyan — highlighted country */
   --armenia-stroke:    103 232 249;  /* brighter cyan core */
   --armenia-glow:      34  211 238;  /* glow colour for the drop-shadow */
 
-  /* Hydrology (Natural Earth CC0) — luminous steel-teal in cockpit mode */
-  --water-fill:        24  66  110;  /* deep teal-blue */
-  --water-stroke:      72  168 209; /* brighter river line */
+  /* Hydrology (Natural Earth CC0) — barely visible. FR24 keeps
+     water darker than land (or the same), with almost-no contrast. */
+  --water-fill:        8   12  18;  /* just slightly darker than ocean */
+  --water-stroke:      36  46  62;  /* ghost slate — same family as borders */
 
   /* Innovation surfaces */
   --glow-primary:      34  211 238;
@@ -137,25 +142,28 @@
   }
 }
 
-/* ---------- Leaflet: warm-paper map (light) / Flightradar cockpit (dark) ----------
-   Dark mode uses a tighter radial vignette and a more visible coordinate
-   grid so the basemap reads as a "screen" rather than empty void. */
+/* ---------- Leaflet: warm-paper map (light) / Flightradar basemap (dark) ----------
+   The dark basemap mirrors Flightradar24's near-black ocean with a barely-
+   lighter land layer on top. The radial vignette is intentionally soft so
+   the canvas reads as flat rather than a "tube". The country polygons add
+   ~+10% lightness, which is just enough to imply geography without
+   competing with the data layer. */
 .leaflet-container {
   background:
     radial-gradient(
       ellipse at 50% 50%,
       rgb(var(--map-1) / 1) 0%,
-      rgb(var(--map-2) / 1) 55%,
-      rgb(var(--map-3) / 1) 100%
+      rgb(var(--map-2) / 1) 70%,
+      rgb(var(--map-ocean) / 1) 100%
     );
   font-family: inherit;
   outline: none;
   transition: background 240ms ease;
 }
 
-/* Coordinate grid — every leaf in the basemap. Subtle in light mode,
-   sharper + slightly cyan-tinted in dark mode so it reads like an
-   aviation radar display. */
+/* Coordinate grid — almost invisible on the FR24 basemap. A single very-
+   faint 64px grid in both modes, no major grid lines, no scanlines. The
+   data layer is what should breathe, not the background. */
 .leaflet-container::before {
   content: "";
   position: absolute;
@@ -163,29 +171,18 @@
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(to right, rgb(var(--primary) / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(var(--primary) / 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgb(var(--primary) / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--primary) / 0.04) 1px, transparent 1px);
   background-size: 64px 64px;
   transition: background-image 240ms ease;
 }
 
 [data-theme="dark"] .leaflet-container::before {
+  /* Single faint 64px grid in dark mode — barely there */
   background-image:
-    /* Coordinate grid — 64px primary, 256px major */
-    linear-gradient(to right, rgb(var(--primary) / 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(var(--primary) / 0.07) 1px, transparent 1px),
-    /* Major grid every 256px (4x) */
-    linear-gradient(to right, rgb(var(--primary) / 0.13) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(var(--primary) / 0.13) 1px, transparent 1px),
-    /* Faint scanline */
-    repeating-linear-gradient(
-      to bottom,
-      rgb(var(--scanline)) 0px,
-      rgb(var(--scanline)) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-  background-size: 72px 72px, 72px 72px, 100% 3px;
+    linear-gradient(to right, rgb(var(--primary) / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--primary) / 0.045) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px;
 }
 
 /* ---------- Map labels (none currently used — kept minimal) ---------- */
@@ -220,29 +217,14 @@
   text-shadow: 0 0 12px rgb(var(--warn) / 0.55);
 }
 
-/* Subtle keyframe for cockpit "scan" sweep on the map area */
+/* Subtle keyframe for cockpit "scan" sweep on the map area
+   — kept as a utility for other surfaces, no longer applied to the
+   Leaflet container (Flightradar's basemap has no scan animation). */
 @keyframes scan-sweep {
   0%   { transform: translateY(-100%); opacity: 0; }
   10%  { opacity: 0.6; }
   90%  { opacity: 0.6; }
   100% { transform: translateY(100%); opacity: 0; }
-}
-[data-theme="dark"] .leaflet-container::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgb(var(--primary) / 0.06) 48%,
-    rgb(var(--primary) / 0.10) 50%,
-    rgb(var(--primary) / 0.06) 52%,
-    transparent 100%
-  );
-  height: 90px;
-  animation: scan-sweep 7s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* ---------- Flightradar-style Armenia border glow ----------
