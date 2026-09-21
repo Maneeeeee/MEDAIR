@@ -35,7 +35,7 @@ export function Header({
                 isDark ? "glow-text-primary" : ""
               }`}
             >
-              <span className="font-bold text-ink-900">MEDAIR</span>{" "}
+              <span className="font-bold text-ink-900">DroneAid</span>{" "}
               <span className="font-light tracking-wide text-primary-500">
                 ARMENIA
               </span>

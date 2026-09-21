@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export type Theme = "light" | "dark";
 
-const STORAGE_KEY = "medair-armenia-theme";
+const STORAGE_KEY = "droneaid-theme";
 
 /* Read the user's stored preference. Falls back to system preference,
    then to light. Safe to call during SSR (no DOM access on the

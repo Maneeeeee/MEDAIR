@@ -1,4 +1,4 @@
-// Core domain types for MEDAIR ARMENIA
+// Core domain types for DroneAid ARMENIA
 
 export type DroneStatus =
   | "idle"

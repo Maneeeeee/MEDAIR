@@ -95,7 +95,7 @@ Two physical contexts matter for the design:
   inside `@media (prefers-reduced-motion: no-preference)` only.
 - **Hospital phone numbers are realistic Armenian numbers** (e.g. `+374 11 50-12-34`)
   not `XXX` placeholders. This is a load-bearing credibility signal.
-- **Brand name is locked** as `MEDAIR ARMENIA`. Do not propose renames.
+- **Brand name is locked** as `DroneAid ARMENIA`. Do not propose renames.
 
 **Open / deferred audit items** (do not pretend they are done):
 
@@ -108,7 +108,7 @@ Two physical contexts matter for the design:
 
 ## Brand Commitments
 
-**Name:** `MEDAIR ARMENIA` — locked. Display style: `MEDAIR` bold black + `ARMENIA`
+**Name:** `DroneAid ARMENIA` — locked. Display style: `DroneAid` bold black + `ARMENIA`
 light-weight medical cyan with wide tracking, on a dark surface.
 
 **Logo mark:** hexagonal network-node frame with a medical cross at centre and a

@@ -1,4 +1,4 @@
-# MEDAIR ARMENIA — Medical Drone Delivery Network
+# DroneAid ARMENIA — Medical Drone Delivery Network
 
 A front-end-only prototype of a real-time medical-drone coordination center for the Republic of Armenia. Built to demonstrate the operational UX of a centralized antivenom, blood, vaccine, and lab-sample drone network covering Armenia's mountainous marzer.
 

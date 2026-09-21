@@ -43,7 +43,7 @@ const ADMIN_PASSWORD = "inecoadmin";
  * We keep the original File name, type, size, upload timestamp,
  * and the base64 data URL (so refreshes survive).
  * ============================================================ */
-const STORAGE_KEY = "medair.presentation.upload.v1";
+const STORAGE_KEY = "droneaid.presentation.upload.v1";
 
 interface StoredFile {
   name: string;

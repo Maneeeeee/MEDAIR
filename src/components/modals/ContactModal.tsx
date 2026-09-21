@@ -112,9 +112,9 @@ export function ContactModal({ onClose }: { onClose: () => void }) {
             </h3>
             <div className="space-y-1.5">
               {[
-                { addr: "operations@medair.am", subject: "Operations request" },
-                { addr: "medical@medair.am", subject: "Medical coordination" },
-                { addr: "engineering@medair.am", subject: "Engineering escalation" },
+                { addr: "operations@droneaid.am", subject: "Operations request" },
+                { addr: "medical@droneaid.am", subject: "Medical coordination" },
+                { addr: "engineering@droneaid.am", subject: "Engineering escalation" },
               ].map((e) => (
                 <a
                   key={e.addr}
@@ -179,7 +179,7 @@ export function ContactModal({ onClose }: { onClose: () => void }) {
           <Button
             variant="secondary"
             onClick={() => {
-              toast.show("Operations centre: scheduling form sent to operations@medair.am.", {
+              toast.show("Operations centre: scheduling form sent to operations@droneaid.am.", {
                 variant: "info",
               });
             }}

@@ -1,4 +1,4 @@
-# Redesign Brief — MEDAIR ARMENIA
+# Redesign Brief — DroneAid ARMENIA
 
 For: a complete visual redesign with a new colour palette and design system.
 Mode: **Operate** (this is still a control console, not a marketing surface).
@@ -79,7 +79,7 @@ makes hierarchy obvious without needing colour or borders.
 - Map functionality: GeoJSON polygons, FitBoundsOnFirstLoad, snap-back fix, drone
   flight simulation, hospital panel data shape
 - Data shape: 14 hospitals, 8 drones, inventory types, status values
-- Brand: `MEDAIR ARMENIA` name (locked per PRODUCT.md)
+- Brand: `DroneAid ARMENIA` name (locked per PRODUCT.md)
 - All previously-fixed bugs: map auto-snap, no watermark, hospital phones realistic
 
 **Anti-goals (the redesign must not do these):**
